@@ -1,25 +1,189 @@
-import logo from './logo.svg';
 import './App.css';
+import "bootstrap/dist/css/bootstrap.min.css";
+import React,{Component} from 'react';
+import Login from './components/login';
+import Topup from './components/topup';
+import Pay from './components/pay'
+import axios from 'axios';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+
+class App extends Component   {
+
+  constructor(props) {
+      super (props);
+      this.state = {
+        login: {
+            name:"",
+            balance:"0",
+            loginResponse:  ""
+        },
+        topup:{
+            amount:"",
+            topupResponse: ""
+        },
+        pay: {
+            payTo: "",
+            amount:"",
+            payResponse: ""
+        }
+    };
+    this.handleLogin = this.handleLogin.bind(this);
+    this.handleLoginSubmit = this.handleLoginSubmit.bind(this);
+    this.handleLoginResponse = this.handleLoginResponse.bind(this);
+
+    this.handleTopup = this.handleTopup.bind(this);
+    this.handleTopupSubmit = this.handleTopupSubmit.bind(this);
+    this.handleTopupResponse = this.handleTopupResponse.bind(this);
+
+    this.handlePay = this.handlePay.bind(this);
+    this.handlePaySubmit = this.handlePaySubmit.bind(this);
+    this.handlePayResponse = this.handlePayResponse.bind(this);
+
+
+  }
+  handleLogin(value){
+    this.setState(prevState =>{
+      let login = Object.assign({}, prevState.login);
+      login.name =value;
+      return {login};
+    });
+  }
+  handleTopup(value){
+    this.setState(prevState =>{
+      let topup = Object.assign({}, prevState.topup);
+      topup.amount =value;
+      return {topup};
+    });
+ }
+ handlePay(name,value){
+
+  this.setState(prevState =>{
+    let pay = Object.assign({}, prevState.pay);
+    pay[name] = value;
+    return {pay};
+  });
+
+}
+  handleLoginResponse(data){
+    this.setState(prevState =>{
+      let login = Object.assign({}, prevState.login);
+      login.loginResponse = JSON.stringify(data);
+      return {login};
+    });
+  }
+  handleTopupResponse(data){
+    this.setState(prevState =>{
+      let topup = Object.assign({}, prevState.topup);
+      topup.topupResponse = JSON.stringify(data);
+      return {topup};
+    });
+  }
+  handlePayResponse(data){
+    this.setState(prevState =>{
+        let pay = Object.assign({}, prevState.pay);
+        pay.payResponse = JSON.stringify(data);
+        return {pay};
+    });
+  }
+  handleLoginSubmit(){
+
+      let requestConfig = {};
+      requestConfig.method="post";
+      requestConfig.url="https://run.mocky.io/v3/2367c6cc-7a28-4fcd-b426-9cbb61ef8845?name="+this.state.login.name;
+      requestConfig.headers={"Content-Type": "application/json" };
+
+      axios(requestConfig)
+      .then(response => {
+        this.handleLoginResponse(response.data);
+      })
+      .catch(e => {
+        console.log(e);
+      });
+  }
+  handleTopupSubmit(){
+
+    if(this.state.login.name == null || this.state.login.name == ''){
+      window.alert("Kindly login to topup");
+      return false;
+    }else if(this.state.topup.amount =="0"){
+      window.alert("Kindly enter more than 0");
+      return false;
+    }
+
+   
+        let requestConfig = {};
+        requestConfig.method="post";
+        requestConfig.url="https://run.mocky.io/v3/0809ee77-8c48-45e1-9365-5220b4fdd514";
+        requestConfig.data={};  
+        requestConfig.data.name=this.state.login.name;
+        requestConfig.data.amount = this.state.topup.amount;
+        requestConfig.headers={"Content-Type": "application/json" };
+    
+        axios(requestConfig)
+        .then(response => {
+          this.handleTopupResponse(response.data);
+        })
+        .catch(e => {
+          console.log(e);
+        });
+    
+
+}
+handlePaySubmit(){
+
+  if(this.state.login.name == null || this.state.login.name == ''){
+    window.alert("Kindly login to topup");
+    return false;
+  }else if(this.state.pay.payTo == null || this.state.pay.payTo ==''){
+    window.alert("Kindly enter PayTo");
+    return false;
+  }else if(this.state.pay.amount =="0"){
+    window.alert("Kindly enter more than 0");
+    return false;
+  }
+
+      let requestConfig = {};
+      requestConfig.method="post";
+      requestConfig.url="https://run.mocky.io/v3/96e6f993-e08e-413c-a04e-eabae3e5b8eb";
+      requestConfig.data={};  
+      requestConfig.data.name=this.state.login.name;
+      requestConfig.data.payTo = this.state.pay.payTo;
+      requestConfig.data.amount = this.state.pay.amount;
+      requestConfig.headers={"Content-Type": "application/json" };
+  
+      axios(requestConfig)
+      .then(response => {
+        this.handlePayResponse(response.data);
+      })
+      .catch(e => {
+        console.log(e);
+      });
+  
+
+}
+
+  componentDidMount() {
+     console.log("Login Comp Mounted");
+  }
+
+  render(){
+      return (
+        <div id="retailbankingroot">
+            <nav className="navbar navbar-expand navbar-dark bg-dark">
+              <div className="navbar-brand">
+                Retail Banking
+              </div>
+            </nav>
+            <h3>Login</h3>
+            <Login value={this.state.login.name} onChange={this.handleLogin} loginDisplay={this.state.login.loginResponse} loginSubmit={this.handleLoginSubmit}></Login>
+            <h3>Top Up</h3>
+            <Topup value={this.state.topup.amount} onChange={this.handleTopup} topupDisplay={this.state.topup.topupResponse} topupSubmit={this.handleTopupSubmit}></Topup>
+            <h3> Pay </h3>
+            <Pay  payTOalue={this.state.pay.payTo} onChange={this.handlePay} payDisplay={this.state.pay.payResponse} paySubmit={this.handlePaySubmit}></Pay>
+        </div>
+      )
+  }
+ 
 }
 
 export default App;
